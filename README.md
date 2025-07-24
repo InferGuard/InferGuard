@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="InferGuard.svg" alt="InferGuard Logo" width="200"/>
+  <img src="InferGuard.svg" alt="InferGuard Logo" width="300"/>
 </p>
 
 # 🛡️ InferGuard

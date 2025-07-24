@@ -219,6 +219,17 @@ EMOJI_MAP = {
 # Zero-width char range
 ZERO_WIDTH_RE = re.compile(r"[\u200B-\u200D\uFEFF]")
 
+# Add Advanced Jabralink Detection Patterns
+JABRALINK_PATTERNS = [
+    r"[\u200B-\u200D\uFEFF]",  # Zero-width
+    r"[^\x00-\x7F]{3,}",       # Unicode script abuse (≥3 non-ASCII)
+    r"[\u0300-\u036F]{2,}",    # Zalgo combining marks
+    r"(🅰️|🅱️|🆎|🆔|🔠|🆘)",         # Emoji substitution abuse
+    r"(ignore|override|prompt)[\W_]{0,3}(again|all|filters)",  # Jabralink phrasing
+    r"(invis|whis|echo|speak|subvocal|inject).*prompt",         # Audio prompt bait
+    r"(morse|base64|hex).*(command|code|payload)",              # Encoded intent
+    r"(curl|wget).*\|.*(sh|bash)",                              # Embedded remote command
+]
 
 def normalize_unicode(text: str) -> str:
     return unicodedata.normalize("NFKC", text)
