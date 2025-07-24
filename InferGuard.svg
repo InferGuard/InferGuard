@@ -1,0 +1,28 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Central Node -->
+  <circle cx="100" cy="100" r="6" fill="#16a085"/>
+
+  <!-- Fractal Arcs: Symmetrical neuron branches -->
+  <path d="M100,100 C70,80 70,50 100,40" stroke="#1abc9c" stroke-width="3" fill="none"/>
+  <path d="M100,100 C130,80 130,50 100,40" stroke="#1abc9c" stroke-width="3" fill="none"/>
+
+  <path d="M100,100 C70,120 70,150 100,160" stroke="#1abc9c" stroke-width="3" fill="none"/>
+  <path d="M100,100 C130,120 130,150 100,160" stroke="#1abc9c" stroke-width="3" fill="none"/>
+
+  <path d="M100,100 C80,70 50,70 40,100" stroke="#1abc9c" stroke-width="3" fill="none"/>
+  <path d="M100,100 C120,70 150,70 160,100" stroke="#1abc9c" stroke-width="3" fill="none"/>
+
+  <path d="M100,100 C80,130 50,130 40,100" stroke="#1abc9c" stroke-width="3" fill="none"/>
+  <path d="M100,100 C120,130 150,130 160,100" stroke="#1abc9c" stroke-width="3" fill="none"/>
+
+  <!-- Peripheral Nodes -->
+  <circle cx="100" cy="40" r="7" fill="#ecf0f1"/>
+  <circle cx="100" cy="160" r="7" fill="#ecf0f1"/>
+  <circle cx="40" cy="100" r="7" fill="#ecf0f1"/>
+  <circle cx="160" cy="100" r="7" fill="#ecf0f1"/>
+  <circle cx="70" cy="80" r="5" fill="#ecf0f1"/>
+  <circle cx="130" cy="80" r="5" fill="#ecf0f1"/>
+  <circle cx="70" cy="120" r="5" fill="#ecf0f1"/>
+  <circle cx="130" cy="120" r="5" fill="#ecf0f1"/>
+</svg>
+
