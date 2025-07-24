@@ -264,31 +264,50 @@ def scan_prompt(prompt: str) -> Dict:
         "pii_found": [],
         "remote_exec_risk": False,
         "encoding_obfuscation": False,
+        "jabralink_detected": False,
         "score": 0.0,
         "alerts": []
     }
 
     norm_prompt = normalize_unicode(prompt)
 
-    # Injection
+    # Prompt Injection
     inj = match_any(PROMPT_INJECTION_PATTERNS, norm_prompt)
     if inj:
         report["prompt_injection"] = True
         report["alerts"].append("⚠️ Prompt Injection Detected")
 
-    # Jailbreak
+    # Jailbreak / Obfuscation
     jail = match_any(ENCODED_INPUT_PATTERNS, prompt)
     if jail:
         report["jailbreak"] = True
         report["alerts"].append("🛑 Obfuscated / Jailbreak Payload")
 
+    # Morse Trigger (basic presence)
+    if re.search(r"[.-]{3,}", prompt):
+        report["alerts"].append("📡 Morse-like pattern detected")
+
+    # Emoji translation abuse
+    if any(e in prompt for e in EMOJI_MAP.keys()):
+        report["alerts"].append("🔣 Emoji-substitution detected")
+
+    # Zero-width encoding
+    if ZERO_WIDTH_RE.search(prompt):
+        report["encoding_obfuscation"] = True
+        report["alerts"].append("🕵️‍♂️ Zero-width encoding used")
+
+    # Jabralink-style attack
+    if match_any(JABRALINK_PATTERNS, prompt):
+        report["jabralink_detected"] = True
+        report["alerts"].append("🧬 Jabralink-style covert injection")
+
     # Secrets
-    for label, pattern in SECRETS_PATTERNS.items():
+    for label, pattern in PII_PATTERNS.items():
         if re.search(pattern, norm_prompt):
             report["secrets_found"].append(label)
             report["alerts"].append(f"🔐 Potential {label} detected")
 
-    # PII_PATTERNS
+    # PII
     for label, pattern in PII_PATTERNS.items():
         if re.search(pattern, norm_prompt):
             report["pii_found"].append(label)
@@ -299,12 +318,15 @@ def scan_prompt(prompt: str) -> Dict:
         report["remote_exec_risk"] = True
         report["alerts"].append("🚨 Remote Execution Pattern")
 
-    # Scoring (naive for now)
+    # Score
     score = (
-        int(report["prompt_injection"]) * 0.3 +
-        int(report["jailbreak"]) * 0.3 +
+        int(report["prompt_injection"]) * 0.2 +
+        int(report["jailbreak"]) * 0.2 +
+        int(report["jabralink_detected"]) * 0.2 +
         len(report["secrets_found"]) * 0.1 +
-        int(report["remote_exec_risk"]) * 0.2
+        len(report["pii_found"]) * 0.1 +
+        int(report["encoding_obfuscation"]) * 0.1 +
+        int(report["remote_exec_risk"]) * 0.1
     )
     report["score"] = min(score, 1.0)
 
