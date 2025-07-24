@@ -51,16 +51,18 @@ PROMPT_INJECTION_PATTERNS = [
 ]
 
 # ✅ Secrets and API Keys
-SECRETS_PATTERNS = {
-    "AWS Access Key": r"AKIA[0-9A-Z]{16}",
-    "Google API Key": r"AIza[0-9A-Za-z-_]{35}",
-    "OpenAI Key": r"sk-[a-zA-Z0-9]{32,}",
-    "Slack Token": r"xox[baprs]-[0-9a-zA-Z]{10,48}",
-    "Generic Secret": r"(secret|password|pass|pwd)[\s:=]+[^\s\'\"\\]{6,}",
-    "S3 URI": r"s3://[a-zA-Z0-9\-_./]+",
-    "Mongo URI": r"mongodb(?:\+srv)?://[^:]+:[^@]+@[^ \n]+",
-    "Basic Auth": r"Authorization:\s*Basic\s+[a-zA-Z0-9+/=]{16,}",
-    "Base64 block": r"[A-Za-z0-9+/]{40,}={0,2}",
+PII_PATTERNS = {
+    "Email": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b",
+    "Phone": r"\b(?:\+?\d{1,3})?[\s.-]?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{3,4}\b",
+    "SSN": r"\b\d{3}-\d{2}-\d{4}\b",
+    "Credit Card": r"\b(?:\d[ -]*?){13,16}\b",
+    "Name": r"\b[A-Z][a-z]+\s[A-Z][a-z]+\b",
+    "Address": r"\b\d{1,5}\s\w+\s(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln)\b",
+    "Date of Birth": r"\b\d{2}/\d{2}/\d{4}\b",
+    "IP Address": r"\b(?:\d{1,3}\.){3}\d{1,3}\b",
+    "Driver License": r"\b[A-Z]{1}\d{7}\b",
+    "Passport Number": r"\b[A-Z]{2}[0-9]{6}\b",
+    "National ID": r"\b\d{6,10}\b"
 }
 
 # ✅ Remote Execution Patterns
@@ -72,7 +74,7 @@ REMOTE_EXEC_PATTERNS = [
 ]
 
 # Simple regex-based PII patterns
-PII_PATTERNS = {
+SECRETS_PATTERNS = {
     # Personal Identifiable Information (PII)
     "Email": r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b",
     "Phone": r"\b(?:\+?\d{1,3})?[\s.-]?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{3,4}\b",
@@ -185,7 +187,17 @@ PII_PATTERNS = {
     "OpenAI Key": r"sk-[A-Za-z0-9]{32,48}",
     "DeepL API Key": r"auth_key\s*[:=]\s*[\"']?[a-zA-Z0-9\-]{30,45}[\"']?",
     "Cohere Token": r"cohere\.Client\(['\"]?[a-z0-9\-]{20,64}['\"]?\)",
-    "Anthropic API Key": r"cla-[A-Za-z0-9]{32,64}"
+    "Anthropic API Key": r"cla-[A-Za-z0-9]{32,64}",
+    
+    "AWS Access Key": r"AKIA[0-9A-Z]{16}",
+    "Google API Key": r"AIza[0-9A-Za-z-_]{35}",
+    "OpenAI Key": r"sk-[a-zA-Z0-9]{32,}",
+    "Slack Token": r"xox[baprs]-[0-9a-zA-Z]{10,48}",
+    "Generic Secret": r"(secret|password|pass|pwd)[\s:=]+[^\s\'\"\\]{6,}",
+    "S3 URI": r"s3://[a-zA-Z0-9\-_./]+",
+    "Mongo URI": r"mongodb(?:\+srv)?://[^:]+:[^@]+@[^ \n]+",
+    "Basic Auth": r"Authorization:\s*Basic\s+[a-zA-Z0-9+/=]{16,}",
+    "Base64 block": r"[A-Za-z0-9+/]{40,}={0,2}",
 }
 
 # ✅ Encoding patterns that hide intent (unicode obfuscation, morse)
@@ -249,6 +261,7 @@ def scan_prompt(prompt: str) -> Dict:
         "prompt_injection": False,
         "jailbreak": False,
         "secrets_found": [],
+        "pii_found": [],
         "remote_exec_risk": False,
         "encoding_obfuscation": False,
         "score": 0.0,
@@ -273,6 +286,12 @@ def scan_prompt(prompt: str) -> Dict:
     for label, pattern in SECRETS_PATTERNS.items():
         if re.search(pattern, norm_prompt):
             report["secrets_found"].append(label)
+            report["alerts"].append(f"🔐 Potential {label} detected")
+
+    # PII_PATTERNS
+    for label, pattern in PII_PATTERNS.items():
+        if re.search(pattern, norm_prompt):
+            report["pii_found"].append(label)
             report["alerts"].append(f"🔐 Potential {label} detected")
 
     # Remote exec
