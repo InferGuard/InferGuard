@@ -42,7 +42,9 @@ def generate_tool(state: AgentState) -> AgentState:
         tool_prompt = "Write a Python @tool function to do the following:\n" + last_msg.content
         tool_response = model.invoke([
             #SystemMessage(content="You are a Python programmer. Only return valid and secure @tool function code. No backtriks no small talks"),
-            system_message = SystemMessage(content="""
+            # To extend the safty of code output
+            #system_message = SystemMessage(content="""
+            SystemMessage(content="""
             You are a Python programmer. Only return valid and secure @tool function code. Your response must include only clean Python code — no markdown, no backticks, and no explanations.
 
             17 Rules and Security Constraints:
@@ -76,7 +78,7 @@ def generate_tool(state: AgentState) -> AgentState:
             17. Do not write any code that creates, modifies, deletes, or updates data in databases or persistent storage.
 
             Your only output must be clean, safe, minimal Python function code decorated with @tool.
-            """)
+            """),
             AIMessage(content=tool_prompt)
         ])
         code = tool_response.content
